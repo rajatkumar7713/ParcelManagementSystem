@@ -1,0 +1,201 @@
+/* Assuming you have a navbar that is fixed at the top */
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.chats .chat-item {
+    margin-top: 10px; /* Space between each chat item */
+}
+
+.chat-item {
+    background: #fff; /* Default background color */
+    border: 1px solid #ddd; /* Border around each box */
+    border-radius: 5px; /* Rounded corners */
+    padding: 10px; /* Space inside each box */
+    margin-bottom: 10px; /* Space between boxes */
+    transition: background-color 0.3s; /* Smooth background color transition */
+    cursor: pointer; /* Pointer cursor on hover */
+}
+
+.chat-item.active {
+    background-color: #007bff; /* Blue background for the active state */
+    color: #fff; /* White text color for contrast */
+}
+
+.chat-details {
+    padding: 5px; /* Space inside each box */
+    margin-bottom: 5px; /* Space between boxes */
+}
+
+.chat-ui-container {
+    display: flex;
+    width: 100%;
+    height: calc(100vh - 60px); /* Adjust for navbar height */
+}
+
+.sidebarchat {
+    background: #f8f9fa;
+    padding: 10px;
+    width: 250px;
+    height: 100%;
+    overflow-y: auto;
+    border-right: 1px solid #ddd; /* Add a border between sidebar and chat box */
+}
+
+.chat-box {
+    flex: 1; /* Take up the remaining space */
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.chat-header h6 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Vertically center items */
+    margin: 0;
+    font-size: 16px; /* Adjust font size as needed */
+}
+
+
+.chat-header-btn {
+    margin-left:623px; /* Push the button to the right */
+}
+
+
+/* Style for the status */
+.status {
+    background-color: #28a745; /* Green background for "Paid" */
+    color: #fff; /* White text color */
+    padding: 3px 8px; /* Padding for spacing */
+    border-radius: 3px; /* Rounded corners */
+    font-size: 14px; /* Font size for the status */
+    margin-left: 10px; /* Space between "Order #1234" and "Paid" */
+    align-self: center; /* Ensure it is centered with other elements */
+}
+
+/* Adjust the container for the chat UI */
+.container-fluidbox {
+    position: relative;
+    left: -200px; /* Move the container 200px to the right */
+    margin-top: 10px; /* Adjust based on the height of your navbar */
+    display: flex;
+}
+
+.search-bar {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.chat-messages {
+    max-height: calc(100% - 80px); /* Adjust height for messages area */
+}
+
+.message {
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.message.sent {
+    background-color: #e1ffc7;
+    align-self: flex-end;
+}
+
+.message.received {
+    background-color: #f1f1f1;
+    position: relative;
+}
+
+.message-input {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 10px;
+}
+
+.wrapper {
+    /* background: #ffd800; */
+    width: 844px;
+    height: 160px;
+    position: relative;
+    margin-top: 10px;
+}
+
+.margin-area {
+    position: relative;
+    text-align: center;
+    font-family: "Trebuchet", sans-serif;
+    font-size: 14px;
+    margin: 0 20px;
+}
+
+.dot {
+    height: 32px;
+    width: 32px;
+    position: absolute;
+    background: #000;
+    border-radius: 50%;
+    color: #fff;
+    line-height: 32px;
+    z-index: 9999;
+}
+
+.dot.one {
+    left: 50px;
+    background: #0C84D9;
+}
+
+.dot.two {
+    left: 259px;
+    background: #0C84D9;
+}
+
+.dot.three {
+    left: 469px;
+    background: #bbb;
+    color: #ffd800;
+}
+
+.progress-bar {
+    position: absolute;
+    height: 10px;
+    width: 25%;
+    top: 20px;
+    background: #bbb;
+}
+
+.progress-bar.first {
+    left: 65px;
+    background: #0C84D9;
+}
+
+.progress-bar.second {
+    left: 280px;
+}
+
+.progress-bar.third {
+    left: 490px;
+}
+
+.message {
+    position: absolute;
+    font-size: 14px;
+    color: #000;
+    margin-top: 20px;
+}
+
+
+
+.message.message-1 {
+    left: 33px; /* Align below the first dot */
+}
+
+.message.message-2 {
+    left: 239px; /* Align below the second dot */
+}
+
+.message.message-3 {
+    left: 445px; /* Align below the third dot */
+}

@@ -1,0 +1,109 @@
+<!-- templates/home.html -->
+{% extends 'index.html' %} 
+{% load static %} 
+{% block content %}
+<head>
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="{% static 'parcelcss/css/style.css' %}"
+  />
+</head>
+<div class="container-fluidbox">
+  <!-- Chat UI Container -->
+  <div class="chat-ui-container">
+    <!-- Sidebar for Chats -->
+    <div class="sidebarchat">
+      <div class="search-bar">
+        <input type="text" placeholder="Search..." />
+      </div>
+      <div class="chats">
+        <h5>Orders</h5>
+        <div class="chat-item" data-url="/order/1234">
+          <div class="chat-details">
+            <h6>Order ID: 1234</h6>
+            <p>Order one</p>
+            <p>Status: Pending</p>
+          </div>
+        </div>
+        <div class="chat-item" data-url="/order/12345">
+          <div class="chat-details">
+            <h6>Order ID: 12345 - Order two</h6>
+            <p>Status: Pending</p>
+          </div>
+        </div>
+        <div class="chat-item" data-url="/order/123456">
+          <div class="chat-details">
+            <h6>Order ID: 123456 - Order Three</h6>
+            <p>Status: Pending</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Chat Box -->
+    <div class="chat-box">
+      <div class="chat-header">
+        <h6>Order #1234</h6> 
+        <span class="status">Paid</span>
+        <button type="button" class="btn btn-primary chat-header-btn" onclick="window.location.href='{% url 'create_parcel' %}'">Create Parcel</button>
+      </div>
+      <div class="chat-messages">
+        <!-- Shipping Progress Bar -->
+        <div class="message received">
+          <div class="wrapper">
+            <div class="margin-area">
+              <div class="dot one">1</div>
+              <div class="dot two">2</div>
+              <div class="dot three">3</div>
+              <div class="progress-bar first"></div>
+              <div class="progress-bar second"></div>
+              <div class="message message-1">Pending</div>
+              <div class="message message-2">Shipped</div>
+              <div class="message message-3">Delivered</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="message-input" style="margin-top: 50px;">
+        <div class="row mt-4">
+          {% if status == 'Pending' %}
+            <div class="col-md-6 text-end">
+              <button type="button" class="btn btn-secondary">Cancel</button>
+            </div>
+            <div class="col-md-6 text-start">
+              <button type="button" class="btn btn-primary">Shipped</button>
+            </div>
+          {% elif status == 'Shipped' %}
+            <div class="col-md-6 text-end">
+              <button type="button" class="btn btn-secondary">Cancel</button>
+            </div>
+            <div class="col-md-6 text-start">
+              <button type="button" class="btn btn-success">Delivered</button>
+            </div>
+          {% elif status == 'Delivered' %}
+            <div class="col-md-12 text-center">
+              <button type="button" class="btn btn-secondary disabled">Order Completed</button>
+            </div>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+    $(document).ready(function() {
+        $('.chat-item').on('click', function() {
+            // Remove 'active' class from any previously active items
+            $('.chat-item').removeClass('active');
+            
+            // Add 'active' class to the clicked item
+            $(this).addClass('active');
+            
+            // Redirect to the URL specified in the data-url attribute
+            var url = $(this).data('url');
+            window.location.href = url;
+        });
+    });
+</script>
+{% endblock %}
