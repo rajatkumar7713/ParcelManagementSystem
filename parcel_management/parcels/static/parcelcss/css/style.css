@@ -1,12 +1,12 @@
 /* Assuming you have a navbar that is fixed at the top */
-.navbar {
+/* .navbar {
     position: fixed;
     top: 0;
     width: 100%;
     z-index: 1000;
-}
+} */
 
-.chats .chat-item {
+.chats {
     margin-top: 10px; /* Space between each chat item */
 }
 
@@ -18,6 +18,7 @@
     margin-bottom: 10px; /* Space between boxes */
     transition: background-color 0.3s; /* Smooth background color transition */
     cursor: pointer; /* Pointer cursor on hover */
+    margin-top: 10px;
 }
 
 .chat-item.active {
@@ -38,9 +39,10 @@
 
 .sidebarchat {
     background: #f8f9fa;
-    padding: 10px;
-    width: 250px;
-    height: 100%;
+    padding: 8px;
+    width: 247px;
+    height: 455px;
+    margin-left: -11px;
     overflow-y: auto;
     border-right: 1px solid #ddd; /* Add a border between sidebar and chat box */
 }
@@ -49,6 +51,7 @@
     flex: 1; /* Take up the remaining space */
     padding: 20px;
     overflow-y: auto;
+    margin-left: 39px;
 }
 
 .chat-header h6 {
@@ -60,9 +63,7 @@
 }
 
 
-.chat-header-btn {
-    margin-left:623px; /* Push the button to the right */
-}
+
 
 
 /* Style for the status */
@@ -79,8 +80,8 @@
 /* Adjust the container for the chat UI */
 .container-fluidbox {
     position: relative;
-    left: -200px; /* Move the container 200px to the right */
-    margin-top: 10px; /* Adjust based on the height of your navbar */
+    left: -258px; /* Move the container 200px to the right */
+    margin-top: 5px; /* Adjust based on the height of your navbar */
     display: flex;
 }
 
@@ -115,20 +116,24 @@
     padding-top: 10px;
 }
 
-.wrapper {
+/* .wrapper { */
     /* background: #ffd800; */
-    width: 844px;
-    height: 160px;
-    position: relative;
-    margin-top: 10px;
-}
+    /* width: 844px; */
+    /* height: 86px; */
+    /* margin-left: 97px; */
+    /* position: relative; */
+    /* margin-top: 10px; */
+/* } */
 
 .margin-area {
     position: relative;
     text-align: center;
     font-family: "Trebuchet", sans-serif;
     font-size: 14px;
-    margin: 0 20px;
+    /* margin: 0 20px; */
+    /* margin-top: 1 rem; */
+    margin-left: 64px;
+    margin-bottom: 6rem;
 }
 
 .dot {
@@ -143,17 +148,17 @@
 }
 
 .dot.one {
-    left: 50px;
+    left: 41px;
     background: #0C84D9;
 }
 
 .dot.two {
-    left: 259px;
+    left: 237px;
     background: #0C84D9;
 }
 
 .dot.three {
-    left: 469px;
+    left: 432px;
     background: #bbb;
     color: #ffd800;
 }
@@ -168,11 +173,10 @@
 
 .progress-bar.first {
     left: 65px;
-    background: #0C84D9;
 }
 
 .progress-bar.second {
-    left: 280px;
+    left: 260px;
 }
 
 .progress-bar.third {
@@ -189,13 +193,13 @@
 
 
 .message.message-1 {
-    left: 33px; /* Align below the first dot */
+    left: 28px; /* Align below the first dot */
 }
 
 .message.message-2 {
-    left: 239px; /* Align below the second dot */
+    left: 223px; /* Align below the second dot */
 }
 
 .message.message-3 {
-    left: 445px; /* Align below the third dot */
+    left: 411px; /* Align below the third dot */
 }

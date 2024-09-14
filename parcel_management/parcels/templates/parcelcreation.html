@@ -1,10 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'index.html' %} 
+{% block content %}
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  {% comment %} <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" /> {% endcomment %}
   <title>Parcel Creation</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+  {% comment %} <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" /> {% endcomment %}
   <style>
     .form-container {
       margin-top:5px; /* Space at the top for the header */
@@ -23,8 +24,8 @@
     }
   </style>
 </head>
-<body>
-  <div class="container form-container">
+
+  <div class="container form-container mt-5">
     <div class="form-box">
       <h3 class="text-center mb-4">Parcel Data</h3>
       <form id="dataForm">
@@ -33,64 +34,46 @@
           <input type="text" class="form-control" id="parcelName" required />
         </div>
         <div class="mb-3">
-          <label for="nameSelect" class="form-label"> Sender Name</label>
-          <select class="form-select" id="nameSelect" required>
-            <option value="" disabled selected>Sender Name</option>
-            <!-- Populate these options dynamically if needed -->
-            <option value="Sender Name">Sender Name</option>
-            <option value="Recipient Name">Recipient Name</option>
-          </select>
+          <label for="senderName" class="form-label">Sender Name</label>
+          <input type="text" class="form-control" id="senderName" required />
         </div>
         <div class="mb-3">
-            <label for="nameSelect" class="form-label">Name</label>
-            <select class="form-select" id="nameSelect" required>
-              <option value="" disabled selected>Recipient Name</option>
-              <!-- Populate these options dynamically if needed -->
-              <option value="Sender Name">Sender Name</option>
-              <option value="Recipient Name">Recipient Name</option>
-            </select>
-          </div>
+          <label for="reciepientName" class="form-label">Reciepient Name</label>
+          <input type="text" class="form-control" id="reciepientName" required />
+        </div> 
         <button type="submit" class="btn btn-primary w-100">Submit</button>
       </form>
     </div>
   </div>
 
-  <div class="container mt-5">
-    <h3>Submitted Data</h3>
-    <table class="table table-bordered table-striped" id="dataTable">
-      <thead>
-        <tr>
-          <th>Parcel Name</th>
-          <th>Name</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Data will be appended here dynamically -->
-      </tbody>
-    </table>
-  </div>
-
   <!-- jQuery -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
   <script>
     $(document).ready(function () {
+      const accessToken = localStorage.getItem('access_token');
       $("#dataForm").submit(function (e) {
         e.preventDefault();
-
+        
         // Get form values
         const parcelName = $("#parcelName").val();
-        const name = $("#nameSelect").val();
-
+        const senderName = $("#senderName").val();
+        const reciepientName = $("#reciepientName").val();
         // Form data to send to API
         const formData = {
           parcel_name: parcelName,
-          name: name,
+          sender_name: senderName,
+          recipient_name:reciepientName
         };
 
         // Sending form data to the API
         $.ajax({
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          },
           type: "POST",
-          url: "/your-api-endpoint", // Replace with actual API endpoint
+          url: "/parcelCreation/", // Replace with actual API endpoint
           data: JSON.stringify(formData),
           contentType: "application/json",
           success: function (response) {
@@ -116,5 +99,6 @@
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+
+
+{% endblock %}

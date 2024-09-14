@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+import random
+import string
 # Custom user model
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
@@ -30,18 +31,30 @@ class CustomUser(AbstractUser):
 
 # Parcel model
 class Parcel(models.Model):
-    tracking_number = models.CharField(max_length=100, unique=True)
+    tracking_number = models.CharField(max_length=100, unique=True ,blank=True)
     sender_name = models.CharField(max_length=100)
     parcel_name=models.CharField(max_length=100)
     recipient_name = models.CharField(max_length=100)
-    STATUS_CHOICES = [('pending', 'Pending'), ('shipped', 'Shipped'), ('delivered', 'Delivered')]
+    STATUS_CHOICES = [('pending', 'Pending'), ('shipped', 'Shipped'), ('delivered', 'Delivered'),('canceled', 'Canceled')]
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def generate_tracking_number(self):
+        """Generate a unique tracking number."""
+        length = 10
+        characters = string.ascii_letters + string.digits
+        tracking_number = ''.join(random.choice(characters) for _ in range(length))
+        return tracking_number
+
+    def save(self, *args, **kwargs):
+        if not self.tracking_number:
+            self.tracking_number = self.generate_tracking_number()
+        super().save(*args, **kwargs)
+
 # Transaction Log model
 class TransactionLog(models.Model):
     parcel = models.ForeignKey(Parcel, on_delete=models.CASCADE)
-    status = models.CharField(max_length=20)
+    status = models.TextField(max_length=500)
     timestamp = models.DateTimeField(auto_now_add=True)
 

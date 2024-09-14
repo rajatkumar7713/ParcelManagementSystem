@@ -1,7 +1,5 @@
 <!-- templates/home.html -->
-{% extends 'index.html' %} 
-{% load static %} 
-{% block content %}
+{% extends 'index.html' %} {% load static %} {% block content %}
 <head>
   <link
     rel="stylesheet"
@@ -9,101 +7,236 @@
     href="{% static 'parcelcss/css/style.css' %}"
   />
 </head>
-<div class="container-fluidbox">
-  <!-- Chat UI Container -->
-  <div class="chat-ui-container">
-    <!-- Sidebar for Chats -->
-    <div class="sidebarchat">
-      <div class="search-bar">
-        <input type="text" placeholder="Search..." />
-      </div>
-      <div class="chats">
-        <h5>Orders</h5>
-        <div class="chat-item" data-url="/order/1234">
-          <div class="chat-details">
-            <h6>Order ID: 1234</h6>
-            <p>Order one</p>
-            <p>Status: Pending</p>
+<div class="card">
+  <div class="container" style="margin-top: 39px">
+    <div class="row">
+      <div class="col-md-2">
+        <div class="sidebarchat">
+          <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search..." />
           </div>
-        </div>
-        <div class="chat-item" data-url="/order/12345">
-          <div class="chat-details">
-            <h6>Order ID: 12345 - Order two</h6>
-            <p>Status: Pending</p>
-          </div>
-        </div>
-        <div class="chat-item" data-url="/order/123456">
-          <div class="chat-details">
-            <h6>Order ID: 123456 - Order Three</h6>
-            <p>Status: Pending</p>
+          <div class="chats">
+            <h5>Orders</h5>
           </div>
         </div>
       </div>
-    </div>
-    <!-- Chat Box -->
-    <div class="chat-box">
-      <div class="chat-header">
-        <h6>Order #1234</h6> 
-        <span class="status">Paid</span>
-        <button type="button" class="btn btn-primary chat-header-btn" onclick="window.location.href='{% url 'create_parcel' %}'">Create Parcel</button>
-      </div>
-      <div class="chat-messages">
-        <!-- Shipping Progress Bar -->
-        <div class="message received">
-          <div class="wrapper">
-            <div class="margin-area">
-              <div class="dot one">1</div>
-              <div class="dot two">2</div>
-              <div class="dot three">3</div>
-              <div class="progress-bar first"></div>
-              <div class="progress-bar second"></div>
-              <div class="message message-1">Pending</div>
-              <div class="message message-2">Shipped</div>
-              <div class="message message-3">Delivered</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="message-input" style="margin-top: 50px;">
-        <div class="row mt-4">
-          {% if status == 'Pending' %}
-            <div class="col-md-6 text-end">
-              <button type="button" class="btn btn-secondary">Cancel</button>
-            </div>
-            <div class="col-md-6 text-start">
-              <button type="button" class="btn btn-primary">Shipped</button>
-            </div>
-          {% elif status == 'Shipped' %}
-            <div class="col-md-6 text-end">
-              <button type="button" class="btn btn-secondary">Cancel</button>
-            </div>
-            <div class="col-md-6 text-start">
-              <button type="button" class="btn btn-success">Delivered</button>
-            </div>
-          {% elif status == 'Delivered' %}
-            <div class="col-md-12 text-center">
-              <button type="button" class="btn btn-secondary disabled">Order Completed</button>
-            </div>
-          {% endif %}
-        </div>
-
+      <div class="col-md-10">
+        <div class="chat-box"></div>
       </div>
     </div>
   </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function() {
-        $('.chat-item').on('click', function() {
-            // Remove 'active' class from any previously active items
-            $('.chat-item').removeClass('active');
-            
-            // Add 'active' class to the clicked item
-            $(this).addClass('active');
-            
-            // Redirect to the URL specified in the data-url attribute
-            var url = $(this).data('url');
-            window.location.href = url;
-        });
+  $(document).ready(function () {
+    // Function to fetch parcels data from API
+    function fetchParcels(query = "") {
+      const accessToken = localStorage.getItem("access_token");
+      const refreshToken = localStorage.getItem("refresh_token");
+      $.ajax({
+        url: `/allparcel/?search=${encodeURIComponent(query)}`, // Include query in URL
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        success: function (response) {
+          const parcels = response.parcels;
+          console.log("Parcels", parcels);
+          displayParcels(parcels); // Call the function to display data
+          if (parcels.length > 0) {
+            fetchOrderDetails(parcels[0].tracking_number); // Automatically populate chat-box with first order
+          }
+        },
+        error: function () {
+          console.error("Error fetching data");
+        },
+      });
+    }
+
+    // Function to display parcels in the HTML structure
+    function displayParcels(parcels) {
+      const chatList = $(".chats"); // Select the container for chat items
+      chatList.empty(); // Clear existing items before adding new ones
+
+      parcels.forEach(function (parcel) {
+        const chatItem = $('<div class="chat-item"></div>'); // Create a new chat item
+        const chatDetails = $('<div class="chat-details"></div>'); // Create container for details
+
+        chatDetails.append(`<h6>Order ID: ${parcel.tracking_number}</h6>`); // Example: assuming 'tracking_number' property
+        chatDetails.append(`<p>${parcel.parcel_name || "Unnamed Parcel"}</p>`); // Example: assuming 'parcel_name' property or default
+        chatDetails.append(`<p>Status: ${parcel.status || "Unknown"}</p>`); // Example: assuming 'status' property or default
+        chatItem.append(chatDetails);
+
+        // Add data URL for linking (modify based on your data structure)
+        chatItem.attr("data-id", parcel.tracking_number); // Add data ID for fetching details
+
+        chatList.append(chatItem); // Add the chat item to the container
+      });
+    }
+
+    // Function to fetch order details
+    function fetchOrderDetails(trackingNumber) {
+      const accessToken = localStorage.getItem("access_token");
+      $.ajax({
+        url: `/order/${trackingNumber}/`, // Endpoint for order details
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        success: function (response) {
+          const parcel = response.parcel;
+          displayOrderDetails(parcel); // Call the function to display details
+        },
+        error: function () {
+          console.error("Error fetching order details");
+        },
+      });
+    }
+
+    // Function to display order details
+    function displayOrderDetails(parcel) {
+      console.log("parcel", parcel);
+      const detailsContainer = $(".chat-box"); // Select the container for displaying order details
+      detailsContainer.empty(); // Clear existing content
+
+      // Display order details similar to the desired structure
+      detailsContainer.append(`
+            <div class="col-md-8">
+                <h6>Order #${parcel.tracking_number}</h6>
+                <span class="status">${parcel.status.toUpperCase()}</span>
+            </div>
+            <div class="message received">
+                <dl class="row">
+                    <dt class="col-sm-3">Parcel Name</dt>
+                    <dd class="col-sm-9">${parcel.parcel_name}</dd>
+                </dl>
+                <dl class="row">
+                    <dt class="col-sm-3">Sender Name</dt>
+                    <dd class="col-sm-9">${parcel.sender_name}</dd>
+                </dl>
+                <dl class="row">
+                    <dt class="col-sm-3">Recipient Name</dt>
+                    <dd class="col-sm-9">${parcel.recipient_name}</dd>
+                </dl>
+                <div class="margin-area">
+                    <div class="dot one">1</div>
+                    <div class="dot two">2</div>
+                    <div class="dot three">3</div>
+                    <div class="progress-bar first"></div>
+                    <div class="progress-bar second"></div>
+                    <div class="message message-1">Pending</div>
+                    <div class="message message-2">Shipped</div>
+                    <div class="message message-3">Delivered</div>
+                </div>
+                <div class="row">
+                    ${getActionButtons(parcel.status, parcel.tracking_number)}
+                </div>
+            </div>
+        `);
+    }
+
+    // Function to get action buttons based on status
+    function getActionButtons(status, tracking_number) {
+      if (status === "pending") {
+        return `
+                <div class="col-md-6 text-end" style="margin-left:-73px">
+                    <button type="button" class="btn btn-secondary" onclick="cancelOrder('${tracking_number}')">Cancel</button>
+                </div>                                            
+                <div class="col-md-6 text-start">
+                    <button type="button" class="btn btn-primary" onclick="markAsShipped('${tracking_number}')">Shipped</button>
+                </div>
+            `;
+      }else if (status === "canceled") {
+        return `
+                <div class="col-md-6 text-end">
+                    <button type="button" class="btn btn-secondary" disabled>Canceled</button>
+                </div>
+            `;
+      }
+       else if (status === "shipped") {
+        return `
+                <div class="col-md-6 text-end">
+                    <button type="button" class="btn btn-secondary" onclick="cancelOrder('${tracking_number}')">Cancel</button>
+                </div>
+                <div class="col-md-6 text-start">
+                    <button type="button" class="btn btn-success" onclick="markAsDelivered('${tracking_number}')">Delivered</button>
+                </div>
+            `;
+      } else if (status === "delivered") {
+        return `
+                <div class="col-md-12 text-center">
+                    <button type="button" class="btn btn-secondary disabled">Order Completed</button>
+                </div>
+            `;
+      }
+      return "";
+    }
+
+    // Event handler for input in search bar
+    $("#searchInput").on("input", function () {
+      const searchQuery = $(this).val();
+      fetchParcels(searchQuery); // Pass search query to fetchParcels
     });
+
+    // Event handler for click on chat items
+    $(".chats").on("click", ".chat-item", function () {
+      const trackingNumber = $(this).data("id");
+      if (trackingNumber) {
+        fetchOrderDetails(trackingNumber); // Fetch order details based on ID
+      }
+    });
+
+    // Fetch parcels data when the document is ready
+    fetchParcels(); // Initial fetch without search query
+  });
+
+  async function updateParcelStatus(trackingNumber, newStatus) {
+    const csrftoken = document.querySelector(
+      "[name=csrfmiddlewaretoken]"
+    ).value;
+
+    try {
+      const response = await fetch(`/update-parcel/${trackingNumber}/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrftoken,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        console.log("Parcel status updated:", data);
+        // Optionally, refresh the parcel data or update the UI here
+      } else {
+        console.error("Error updating parcel status:", data);
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+    }
+  }
+
+  function cancelOrder(trackingNumber) {
+    updateParcelStatus(trackingNumber, "canceled");
+    document.querySelector('.progress-bar.first').style.backgroundColor = '';
+    document.querySelector('.progress-bar.second').style.backgroundColor = ''; // Assuming 'canceled' is a valid status or handle it as needed
+  }
+
+  function markAsShipped(trackingNumber) {
+    updateParcelStatus(trackingNumber, "shipped");
+    document.querySelector('.progress-bar.first').style.backgroundColor = '#0C84D9';
+    document.querySelector('.progress-bar.second').style.backgroundColor = '';
+  }
+
+  function markAsDelivered(trackingNumber) {
+    updateParcelStatus(trackingNumber, "delivered");
+    document.querySelector('.progress-bar.first').style.backgroundColor = '#0C84D9';
+    document.querySelector('.progress-bar.second').style.backgroundColor = '#0C84D9';
+  }
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}
