@@ -2,6 +2,7 @@
 {% block content %}
 <head>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <title>Order Details</title>
   <style>
     .content-box {
@@ -10,7 +11,7 @@
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       margin: 0 auto;
-      width: 1200px; /* Adjust as needed */
+      width: 1200px;
       background-color: #fff;
     }
     .container-fluid {
@@ -18,6 +19,10 @@
       display: flex;
       justify-content: center;
     }
+    .text-info { color: orange; }
+    .text-warning { color: yellow; }
+    .text-success { color: green; }
+    .text-danger { color: red; }
   </style>
 </head>
 <body>
@@ -26,10 +31,12 @@
       <div class="col-md-12">
         <div class="d-flex justify-content-between mb-3">
           <h2>Order Details</h2>
+          <button id="exportToExcel" class="btn btn-success">Export to Excel</button>
         </div>
         <table class="table table-striped" id="parcelTable">
           <thead>
             <tr>
+              <th>Tracking Number</th>
               <th>Parcel Name</th>
               <th>Sender Name</th>
               <th>Recipient Name</th>
@@ -45,6 +52,45 @@
     </div>
   </div>
 
+  <!-- Modal for Editing Parcel -->
+  <div class="modal fade" id="editParcelModal" tabindex="-1" aria-labelledby="editParcelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editParcelModalLabel">Edit Parcel</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editParcelForm">
+            <input type="hidden" id="editTrackingNumber" name="tracking_number">
+            <div class="mb-3">
+              <label for="editParcelName" class="form-label">Parcel Name</label>
+              <input type="text" class="form-control" id="editParcelName" name="parcel_name">
+            </div>
+            <div class="mb-3">
+              <label for="editSenderName" class="form-label">Sender Name</label>
+              <input type="text" class="form-control" id="editSenderName" name="sender_name">
+            </div>
+            <div class="mb-3">
+              <label for="editRecipientName" class="form-label">Recipient Name</label>
+              <input type="text" class="form-control" id="editRecipientName" name="recipient_name">
+            </div>
+            <div class="mb-3">
+              <label for="editStatus" class="form-label">Status</label>
+              <select class="form-control" id="editStatus" name="status">
+                <option value="pending">Pending</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="canceled">Canceled</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- jQuery -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
@@ -52,9 +98,8 @@
       // Function to fetch parcels data from API
       function fetchParcels() {
         const accessToken = localStorage.getItem('access_token');
-        const refreshToken = localStorage.getItem('refresh_token');
         $.ajax({
-          url: '/allparcel/', // Adjust the API endpoint if necessary
+          url: '/allparcel/', 
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${accessToken}`,
@@ -64,21 +109,32 @@
             const parcels = response.parcels;
             let rows = '';
             parcels.forEach(parcel => {
+              let statusClass = '';
+              if (parcel.status.toLowerCase() === 'pending') {
+                statusClass = 'text-info';
+              } else if (parcel.status.toLowerCase() === 'shipped') {
+                statusClass = 'text-warning';
+              } else if (parcel.status.toLowerCase() === 'delivered') {
+                statusClass = 'text-success';
+              } else if (parcel.status.toLowerCase() === 'canceled') {
+                statusClass = 'text-danger';
+              }
+
               rows += `
                 <tr>
+                  <td>${parcel.tracking_number}</td>
                   <td>${parcel.parcel_name}</td>
                   <td>${parcel.sender_name}</td>
                   <td>${parcel.recipient_name}</td>
-                  <td>${parcel.status}</td>
+                  <td class="${statusClass}">${parcel.status.charAt(0).toUpperCase() + parcel.status.slice(1).toLowerCase()}</td>
                   <td>
                     <div class="dropdown">
                       <i class="fa-solid fa-ellipsis-vertical" data-bs-toggle="dropdown"></i>
                       <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Edit</a></li>
+                        <li><a class="dropdown-item editParcelBtn" href="#" data-parcel='${JSON.stringify(parcel)}'>Edit</a></li>
                         <li>
                           <form method="post" style="display:inline;">
                             <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                            <button type="submit" class="dropdown-item btn btn-danger btn-sm">Cancel</button>
                           </form>
                         </li>
                       </ul>
@@ -94,6 +150,71 @@
           }
         });
       }
+
+      // Function to handle the edit button click
+      $(document).on('click', '.editParcelBtn', function (e) {
+        e.preventDefault();
+        const parcel = $(this).data('parcel');
+        
+        // Pre-fill the modal form with the parcel data
+        $('#editTrackingNumber').val(parcel.tracking_number);
+        $('#editParcelName').val(parcel.parcel_name);
+        $('#editSenderName').val(parcel.sender_name);
+        $('#editRecipientName').val(parcel.recipient_name);
+        $('#editStatus').val(parcel.status);
+        
+        // Show the modal
+        $('#editParcelModal').modal('show');
+      });
+
+      // Function to submit the form and update the parcel
+      $('#editParcelForm').on('submit', function (e) {
+        e.preventDefault();
+        const accessToken = localStorage.getItem('access_token');
+        const formData = {
+          tracking_number: $('#editTrackingNumber').val(),
+          parcel_name: $('#editParcelName').val(),
+          sender_name: $('#editSenderName').val(),
+          recipient_name: $('#editRecipientName').val(),
+          status: $('#editStatus').val()
+        };
+        $.ajax({
+          url: `/update-parceldetails/${$('#editTrackingNumber').val()}/`, 
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          data: JSON.stringify(formData),
+          success: function () {
+            $('#editParcelModal').modal('hide');
+            fetchParcels(); // Refresh the parcel list
+          },
+          error: function () {
+            console.error('Error updating parcel');
+          }
+        });
+      });
+
+      // Function to handle the export to Excel
+      $('#exportToExcel').on('click', function () {
+        const table = document.getElementById('parcelTable');
+        const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
+        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'binary' });
+
+        function s2ab(s) {
+          const buf = new ArrayBuffer(s.length);
+          const view = new Uint8Array(buf);
+          for (let i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
+          return buf;
+        }
+
+        const filename = 'parcels.xlsx';
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(new Blob([s2ab(wbout)], { type: 'application/octet-stream' }));
+        link.download = filename;
+        link.click();
+      });
 
       // Fetch parcels data when the document is ready
       fetchParcels();

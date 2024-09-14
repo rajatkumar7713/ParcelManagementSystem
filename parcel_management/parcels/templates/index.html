@@ -15,6 +15,7 @@
         body {
             margin: 0;
             padding: 0;
+            overflow-y: auto;
         }
 
         #wrapper {
@@ -78,7 +79,7 @@
     <div id="wrapper">
         {% csrf_token %}
         <!-- Top Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <nav class="navbar navbar-expand-lg navbar-light " style="background-color: #e3f2fd; color:#000">
             <div class="container-fluid">
                 <a class="navbar-brand" href='{% url 'report_table' %}'>
                     <i class="fa-solid fa-dolly"></i>
@@ -87,7 +88,7 @@
                 <span class="navbar-toggler-icon"></span>
               </button>
               <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0"  >
                   <li class="nav-item">
                     <a class="nav-link" href='{% url 'create_parcel' %}'>Create Parcel</a>
                 </li>
@@ -115,7 +116,7 @@
     </div>
 
     <!-- Footer -->
-    <div class="footer">
+    <div class="footer"style="background-color: #e3f2fd">
         <p>&copy; {{ current_year }} My Website. All rights reserved.</p>
     </div>
 

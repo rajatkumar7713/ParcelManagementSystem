@@ -1,16 +1,18 @@
-"""
-ASGI config for parcel_management project.
-
-It exposes the ASGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/4.2/howto/deployment/asgi/
-"""
+# # asgi.py
 
 import os
-
+from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
+from parcels.routing import websocket_urlpatterns
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'parcel_management.settings')
 
-application = get_asgi_application()
+application = ProtocolTypeRouter({
+    "http": get_asgi_application(),  # This handles the standard HTTP requests.
+    "websocket": AuthMiddlewareStack(  # This handles WebSocket requests.
+        URLRouter(
+            websocket_urlpatterns
+        )
+    ),
+})

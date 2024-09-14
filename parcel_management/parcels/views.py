@@ -10,6 +10,8 @@ from .models import *
 from django.http import JsonResponse
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 # Create your views here.
 
 #login 
@@ -100,6 +102,7 @@ def createParcel(request):
 @api_view(['PUT'])
 def update_parcel_status(request, tracking_number):
     try:
+        permission_classes = [IsAuthenticated]  
         parcel = Parcel.objects.get(tracking_number=tracking_number)
     except Parcel.DoesNotExist:
         return Response({'detail': 'Parcel not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -107,13 +110,41 @@ def update_parcel_status(request, tracking_number):
     serializer = ParcelSerializer(parcel, data=request.data, partial=True)
     if serializer.is_valid():
         parcel = serializer.save()
+        # channel_layer = get_channel_layer()
+        # if channel_layer:
+        #     async_to_sync(channel_layer.group_send)(
+        #         f'parcel_{tracking_number}',
+        #         {
+        #             'type': 'update_status',
+        #             'status': parcel.status
+        #         }
+        #     )
+        # else:
+        #     print("Channel layer not configured properly.")
         status_message = f"Updated status to {parcel.status}"
         TransactionLog.objects.create(parcel=parcel, status=status_message)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class UpdateParcelAPIView(APIView):
+    permission_classes = [IsAuthenticated]  
 
+    def put(self, request, tracking_number):
+        try:
+            # Get the parcel by tracking number
+            parcel = Parcel.objects.get(tracking_number=tracking_number)
+        except Parcel.DoesNotExist:
+            return Response({'error': 'Parcel not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Deserialize and validate the incoming data
+        serializer = ParcelSerializer(parcel, data=request.data, partial=True)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 @api_view(['GET'])
 def allParcel(request):
     # Check if the user is authenticated
@@ -121,11 +152,9 @@ def allParcel(request):
         return Response({'detail': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
 
     search_query = request.GET.get('search', '')  
-    print("search_query",search_query)
     parcels = Parcel.objects.filter(
-        Q(parcel_name__icontains=search_query) | Q(id__icontains=search_query)
-    )
-    print("parrrrrrrr",parcels)
+        Q(parcel_name__icontains=search_query) | Q(tracking_number__icontains=search_query)
+    ).order_by('-id')
     # Serialize and return the filtered parcels
     serializer = ParcelSerializer(parcels, many=True)
     return Response({'parcels': serializer.data}, status=status.HTTP_200_OK)

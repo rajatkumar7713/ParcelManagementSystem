@@ -5,15 +5,14 @@ from django.contrib.auth.hashers import make_password
 class ParcelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Parcel
-        fields = ['parcel_name','tracking_number','status','recipient_name','sender_name', 'status']
-
-
+        fields = ['tracking_number', 'sender_name', 'parcel_name', 'recipient_name', 'status']
+        read_only_fields = ['tracking_number']  
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['first_name', 'last_name', 'username', 'email', 'password']
         extra_kwargs = {
-            'password': {'write_only': True}  # Prevent password from being returned
+            'password': {'write_only': True}  
         }
 
     def create(self, validated_data):

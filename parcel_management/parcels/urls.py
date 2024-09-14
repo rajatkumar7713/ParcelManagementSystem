@@ -15,8 +15,5 @@ urlpatterns = [
     path('report-table/', report_table, name='report_table'),
     path('parcelCreation/', createParcel, name='parcel_creation'),
     path('update-parcel/<str:tracking_number>/', update_parcel_status, name='update_parcel_status'),
-
-
-
-
+    path('update-parceldetails/<str:tracking_number>/', UpdateParcelAPIView.as_view(), name='update-parceldetails'),
 ]

@@ -77,6 +77,59 @@
     align-self: center; /* Ensure it is centered with other elements */
 }
 
+.status_delievery {
+    background-color: #28a745; /* Green background for "Paid" */
+    color: #fff; /* White text color */
+    padding: 3px 8px; /* Padding for spacing */
+    border-radius: 3px; /* Rounded corners */
+    font-size: 14px; /* Font size for the status */
+    margin-left: 10px; /* Space between "Order #1234" and "Paid" */
+    align-self: center; /* Ensure it is centered with other elements */
+}
+.status_pending {
+    background-color: hwb(210 33% 8%); /* Green background for "Paid" */
+    color: #fff; /* White text color */
+    padding: 3px 8px; /* Padding for spacing */
+    border-radius: 3px; /* Rounded corners */
+    font-size: 14px; /* Font size for the status */
+    margin-left: 10px; /* Space between "Order #1234" and "Paid" */
+    align-self: center; /* Ensure it is centered with other elements */
+}
+.status_shipped {
+    background-color: #f9d906; /* Green background for "Paid" */
+    color: #fff; /* White text color */
+    padding: 3px 8px; /* Padding for spacing */
+    border-radius: 3px; /* Rounded corners */
+    font-size: 14px; /* Font size for the status */
+    margin-left: 10px; /* Space between "Order #1234" and "Paid" */
+    align-self: center; /* Ensure it is centered with other elements */
+}
+.status_canceled {
+    background-color: #f94343; /* Green background for "Paid" */
+    color: #fff; /* White text color */
+    padding: 3px 8px; /* Padding for spacing */
+    border-radius: 3px; /* Rounded corners */
+    font-size: 14px; /* Font size for the status */
+    margin-left: 10px; /* Space between "Order #1234" and "Paid" */
+    align-self: center; /* Ensure it is centered with other elements */
+}
+
+
+/* .status-pending {
+    color: orange; 
+}
+
+.status-shipped {
+    color: yellow; 
+}
+
+.status-delivered {
+    color: green; 
+}
+.status-canceled {
+    color: red; 
+} */
+
 /* Adjust the container for the chat UI */
 .container-fluidbox {
     position: relative;
@@ -159,8 +212,7 @@
 
 .dot.three {
     left: 432px;
-    background: #bbb;
-    color: #ffd800;
+    background: #0C84D9;
 }
 
 .progress-bar {

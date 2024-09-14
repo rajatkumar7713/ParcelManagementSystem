@@ -42,10 +42,10 @@
         },
         success: function (response) {
           const parcels = response.parcels;
-          console.log("Parcels", parcels);
           displayParcels(parcels); // Call the function to display data
           if (parcels.length > 0) {
             fetchOrderDetails(parcels[0].tracking_number); // Automatically populate chat-box with first order
+
           }
         },
         error: function () {
@@ -97,15 +97,20 @@
 
     // Function to display order details
     function displayOrderDetails(parcel) {
-      console.log("parcel", parcel);
       const detailsContainer = $(".chat-box"); // Select the container for displaying order details
       detailsContainer.empty(); // Clear existing content
-
+      var status_data= "status_delievery"
+      if(parcel.status =="shipped"){
+        status_data="status_shipped"
+      }else if(parcel.status =="pending"){
+        status_data="status_pending"
+      }else if(parcel.status =="canceled"){
+        status_data="status_canceled"
+      }
       // Display order details similar to the desired structure
       detailsContainer.append(`
             <div class="col-md-8">
-                <h6>Order #${parcel.tracking_number}</h6>
-                <span class="status">${parcel.status.toUpperCase()}</span>
+                <h6>Order <span style="color:#f86e05e6">#${parcel.tracking_number}</span> <span class="${status_data}">${parcel.status.toUpperCase()}</span></h6>
             </div>
             <div class="message received">
                 <dl class="row">
@@ -135,6 +140,17 @@
                 </div>
             </div>
         `);
+        if(parcel.status =="shipped"){
+          document.querySelector(".progress-bar.first").style.backgroundColor = "#0C84D9";
+          document.querySelector(".progress-bar.second").style.backgroundColor = "";
+        }else if(parcel.status =="pending" || parcel.status =="canceled" ){
+          document.querySelector(".progress-bar.first").style.backgroundColor = "";
+          document.querySelector(".progress-bar.second").style.backgroundColor = "";
+        }else if(parcel.status =="delivered"){
+          document.querySelector(".progress-bar.first").style.backgroundColor = "#0C84D9";
+          document.querySelector(".progress-bar.second").style.backgroundColor = "#0C84D9";
+        }
+
     }
 
     // Function to get action buttons based on status
@@ -142,34 +158,25 @@
       if (status === "pending") {
         return `
                 <div class="col-md-6 text-end" style="margin-left:-73px">
-                    <button type="button" class="btn btn-secondary" onclick="cancelOrder('${tracking_number}')">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="cancelOrder('${tracking_number}')">Cancel</button>
                 </div>                                            
                 <div class="col-md-6 text-start">
-                    <button type="button" class="btn btn-primary" onclick="markAsShipped('${tracking_number}')">Shipped</button>
+                    <button type="button" class="btn btn-warning" onclick="markAsShipped('${tracking_number}')">Shipped</button>
                 </div>
             `;
-      }else if (status === "canceled") {
+      } else if (status === "canceled") {
+          return ""
+      } else if (status === "shipped") {
         return `
-                <div class="col-md-6 text-end">
-                    <button type="button" class="btn btn-secondary" disabled>Canceled</button>
-                </div>
-            `;
-      }
-       else if (status === "shipped") {
-        return `
-                <div class="col-md-6 text-end">
-                    <button type="button" class="btn btn-secondary" onclick="cancelOrder('${tracking_number}')">Cancel</button>
+                <div class="col-md-6 text-end" style="margin-left:-73px">
+                    <button type="button" class="btn btn-danger"  onclick="cancelOrder('${tracking_number}')">Cancel</button>
                 </div>
                 <div class="col-md-6 text-start">
-                    <button type="button" class="btn btn-success" onclick="markAsDelivered('${tracking_number}')">Delivered</button>
+                    <button type="button" class="btn btn-success" onclick="markAsDelivered('${tracking_number}')">Deliver</button>
                 </div>
             `;
       } else if (status === "delivered") {
-        return `
-                <div class="col-md-12 text-center">
-                    <button type="button" class="btn btn-secondary disabled">Order Completed</button>
-                </div>
-            `;
+            return ""   
       }
       return "";
     }
@@ -210,7 +217,8 @@
       const data = await response.json();
       if (response.ok) {
         console.log("Parcel status updated:", data);
-        // Optionally, refresh the parcel data or update the UI here
+        updateMessage(trackingNumber)
+        window.location.reload()
       } else {
         console.error("Error updating parcel status:", data);
       }
@@ -218,23 +226,43 @@
       console.error("Network error:", error);
     }
   }
+  function updateMessage(trackingNumber) {
+    const socket = new WebSocket(
+      `ws://${window.location.host}/ws/parcel/${trackingNumber}/`
+    );
+
+    socket.onmessage = function (e) {
+      const data = JSON.parse(e.data);
+      const status = data.status;
+      console.log("IN websocket",status)
+      // Update the UI based on the status
+      
+    };
+
+    socket.onclose = function (e) {
+      console.error("WebSocket closed unexpectedly");
+    };
+  }
 
   function cancelOrder(trackingNumber) {
     updateParcelStatus(trackingNumber, "canceled");
-    document.querySelector('.progress-bar.first').style.backgroundColor = '';
-    document.querySelector('.progress-bar.second').style.backgroundColor = ''; // Assuming 'canceled' is a valid status or handle it as needed
+    document.querySelector(".progress-bar.first").style.backgroundColor = "";
+    document.querySelector(".progress-bar.second").style.backgroundColor = ""; // Assuming 'canceled' is a valid status or handle it as needed
   }
 
   function markAsShipped(trackingNumber) {
     updateParcelStatus(trackingNumber, "shipped");
-    document.querySelector('.progress-bar.first').style.backgroundColor = '#0C84D9';
-    document.querySelector('.progress-bar.second').style.backgroundColor = '';
+    document.querySelector(".progress-bar.first").style.backgroundColor =
+      "#0C84D9";
+    document.querySelector(".progress-bar.second").style.backgroundColor = "";
   }
 
   function markAsDelivered(trackingNumber) {
     updateParcelStatus(trackingNumber, "delivered");
-    document.querySelector('.progress-bar.first').style.backgroundColor = '#0C84D9';
-    document.querySelector('.progress-bar.second').style.backgroundColor = '#0C84D9';
+    document.querySelector(".progress-bar.first").style.backgroundColor =
+      "#0C84D9";
+    document.querySelector(".progress-bar.second").style.backgroundColor =
+      "#0C84D9";
   }
 </script>
 
